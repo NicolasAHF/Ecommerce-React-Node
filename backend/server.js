@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
@@ -30,6 +31,20 @@ app.use(helmet()); // Seguridad HTTP
 app.use(cors()); // Habilitar CORS
 app.use(morgan('dev')); // Logging
 app.use(limiter); // Aplicar limitador a todas las rutas
+
+// Configurar sesión
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'super_secret_key123',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // true en producción
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 1 día
+    }
+  })
+);
 
 // Rutas
 app.use('/api/auth', require('./routes/auth'));
